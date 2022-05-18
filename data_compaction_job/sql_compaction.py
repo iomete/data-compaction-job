@@ -1,5 +1,5 @@
 import logging
-from time import time
+import time
 
 from pyspark.sql import SparkSession
 
@@ -51,36 +51,36 @@ class SqlCompaction:
 
     def expire_snapshots(self, namespace, table_name):
         self.logger.debug(f"expire_snapshots started, table={namespace}.{table_name}")
-        start_time = time.perf_counter()
+        start_time = time.time()
 
         self.spark.sql(f"CALL spark_catalog.system.expire_snapshots(table => '{namespace}.{table_name}')")
 
-        end_time = time.perf_counter()
-        self.logger.info(f"expire_snapshots finished! table={namespace}.{table_name} duration={end_time - start_time:0.4f} seconds")
+        end_time = time.time()
+        self.logger.info(f"expire_snapshots finished! table={namespace}.{table_name} duration={end_time - start_time:0.2f} seconds")
 
     def remove_orphan_files(self, namespace, table_name):
         self.logger.debug(f"remove_orphan_files started, table={namespace}.{table_name}")
-        start_time = time.perf_counter()
+        start_time = time.time()
 
         self.spark.sql(f"CALL spark_catalog.system.remove_orphan_files(table => '{namespace}.{table_name}')")
 
-        end_time = time.perf_counter()
-        self.logger.info(f"remove_orphan_files finished! table={namespace}.{table_name} duration={end_time - start_time:0.4f} seconds")
+        end_time = time.time()
+        self.logger.info(f"remove_orphan_files finished! table={namespace}.{table_name} duration={end_time - start_time:0.2f} seconds")
 
     def rewrite_manifest(self, namespace, table_name):
         self.logger.debug(f"rewrite_manifest started, table={namespace}.{table_name}")
-        start_time = time.perf_counter()
+        start_time = time.time()
 
         self.spark.sql(f"CALL spark_catalog.system.rewrite_manifests(table => '{namespace}.{table_name}')")
 
-        end_time = time.perf_counter()
-        self.logger.info(f"rewrite_manifest finished! table={namespace}.{table_name} duration={end_time - start_time:0.4f} seconds")
+        end_time = time.time()
+        self.logger.info(f"rewrite_manifest finished! table={namespace}.{table_name} duration={end_time - start_time:0.2f} seconds")
 
     def rewrite_data_files(self, namespace, table_name):
         self.logger.debug(f"rewrite_data_files started, table={namespace}.{table_name}")
-        start_time = time.perf_counter()
+        start_time = time.time()
 
         self.spark.sql(f"CALL spark_catalog.system.rewrite_data_files(table => '{namespace}.{table_name}')")
 
-        end_time = time.perf_counter()
-        self.logger.info(f"rewrite_data_files finished! table={namespace}.{table_name} duration={end_time - start_time:0.4f} seconds")
+        end_time = time.time()
+        self.logger.info(f"rewrite_data_files finished! table={namespace}.{table_name} duration={end_time - start_time:0.2f} seconds")

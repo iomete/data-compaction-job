@@ -1,5 +1,5 @@
 docker_image := iomete/iomete_data_compaction
-docker_tag := 0.1.2
+docker_tag := 0.1.3
 
 test:
 	python setup.py test
