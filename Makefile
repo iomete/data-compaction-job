@@ -1,11 +1,11 @@
-local_spark_location := ${SPARK_LOCATION}
+docker_image := iomete/iomete_data_compaction
+docker_tag := 0.1.2
 
-# brew install sbt
-build:
-	sbt clean assembly
+test:
+	python setup.py test
 
-submit: build
-	$(local_spark_location)/bin/spark-submit \
-		--properties-file=spark-defaults.conf \
-		--class com.iomete.spark.datacompaction.SqlCompaction \
-		target/scala-2.12/data-compaction-job-assembly-0.1.1.jar
+docker-push:
+	# Run this for one time: docker buildx create --use
+	docker buildx build --platform linux/amd64,linux/arm64 --push -f docker/Dockerfile -t ${docker_image}:${docker_tag} .
+	@echo ${docker_image}
+	@echo ${docker_tag}

@@ -1,13 +1,19 @@
-# data-compaction-job
+# iomete: Spark Job Template
 
-## Run Service
+- https://setuptools.pypa.io/en/latest/userguide/declarative_config.html?highlight=options.extras_require#configuring-setup-using-setup-cfg-files
+-
 
-1. Create `.envrc` file with path to local spark
+## Prepare the dev environment
+
 ```shell
-export SPARK_LOCATION=(location to local spark folder)
+virtualenv .env #or python3 -m venv .env
+source .env/bin/activate
+
+pip install -e ."[dev]"
 ```
 
-2. Submit Spark
+## Run test
+
 ```shell
-make submit
+pytest
 ```
