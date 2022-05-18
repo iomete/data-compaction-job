@@ -1,7 +1,6 @@
 # iomete: Spark Job Template
 
 - https://setuptools.pypa.io/en/latest/userguide/declarative_config.html?highlight=options.extras_require#configuring-setup-using-setup-cfg-files
--
 
 ## Prepare the dev environment
 
