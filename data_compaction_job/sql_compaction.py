@@ -2,25 +2,12 @@ import logging
 import time
 
 from pyspark.sql import SparkSession
-
-from data_compaction_job.utils import PySparkLogger
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-
-project_logger = logging.getLogger("src")
-project_logger.setLevel(logging.DEBUG)
-
-logger = logging.getLogger("SqlCompaction")
-logger.setLevel(logging.INFO)
-
+from data_compaction_job.iomete_logger import iometeLogger
 
 class SqlCompaction:
     def __init__(self, spark: SparkSession):
         self.spark = spark
-
-        self.spark.sparkContext.setLogLevel("INFO")
-        self.logger = PySparkLogger(spark).get_logger(__name__)
+        self.logger = iometeLogger(__name__).get_logger()
 
     def run_compaction(self):
         databases = self.spark.catalog.listDatabases()
