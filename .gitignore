@@ -107,3 +107,4 @@ ENV/
 
 **/local-lakehouse/
 **/spark-warehouse/
+**/lakehouse/

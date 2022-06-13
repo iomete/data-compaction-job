@@ -3,52 +3,62 @@ from typing import List
 
 from pyhocon import ConfigFactory
 
+@dataclass
+class ExpireSnapshotConfig:
+    enabled: bool = True
+    retain_last: int = 1
+
+@dataclass
+class RemoveOrphanFilesConfig:
+    enabled: bool = True
+    older_than_days: int = 3
+
+@dataclass
+class RewriteDataFilesConfig:
+    options: dict[str, str]
+    enabled: bool = True
+    strategy: str = "binpack"
+    sort_order: str = ""
+
+@dataclass
+class RewriteManifestsConfig:
+    enabled: bool = True
+    use_caching: bool = True
 
 @dataclass
 class ApplicationConfig:
-    source_connection: str
-    sync_configs: str
+    expire_snapshot: ExpireSnapshotConfig
+    remove_orphan_files: RemoveOrphanFilesConfig
+    rewrite_data_files: RewriteDataFilesConfig
+    rewrite_manifests: RewriteManifestsConfig
 
 
 def get_config(application_config_path) -> ApplicationConfig:
     config = ConfigFactory.parse_file(application_config_path)
 
-    # source_connection = None
-    # if config['source_connection']['type'] == 'mysql':
-    #     source_connection = MySQLConnection(
-    #         host=config['source_connection']['host'],
-    #         port=config['source_connection']['port'],
-    #         user_name=config['source_connection']['username'],
-    #         user_pass=config['source_connection']['password']
-    #     )
+    app_conf = ApplicationConfig(
+        expire_snapshot=ExpireSnapshotConfig(
+            enabled=config["expire_snapshot"].get("enabled", True),
+            retain_last=config["expire_snapshot"].get("retain_last", 1)
+        ) if config.get("expire_snapshot", None) is not None  else ExpireSnapshotConfig(),
 
-    # def parse_sync_config(sync_config):
-    #     sync_mode = None
-    #     if sync_config["sync_mode"]["type"] == "full_load":
-    #         sync_mode = FullLoad()
-    #     elif sync_config["sync_mode"]["type"] == "incremental_snapshot":
-    #         sync_mode = IncrementalSnapshot(
-    #             sync_config["sync_mode"]["identification_column"],
-    #             sync_config["sync_mode"]["tracking_column"]
-    #         )
-    #     else:
-    #         raise Exception("Unknown sync mode {}, allowed sync modes are: {}".format(
-    #             sync_config["sync_mode"]["type"], ["full_load", "incremental_snapshot"]))
+        remove_orphan_files=RemoveOrphanFilesConfig(
+            enabled=config["remove_orphan_files"].get("enabled", True),
+            older_than_days=config["remove_orphan_files"].get("older_than_days", 3)
+        ) if config.get("remove_orphan_files", None) is not None else RemoveOrphanFilesConfig(),
 
-    #     source_tables = sync_config["source"]["tables"]
-    #     tables = [Table(name=table_name_extractor(tbl.strip()), definition=tbl) for tbl in source_tables]
-    #     return SyncConfig(
-    #         source=SyncSource(
-    #             schema=sync_config["source"]["schema"],
-    #             tables=tables,
-    #             is_all_tables=source_tables and source_tables[0] == "*",
-    #             exclude_tables=sync_config.get("source.exclude_tables", [])
-    #         ),
-    #         destination=SyncDestination(sync_config["destination"]["schema"]),
-    #         sync_mode=sync_mode
-    #     )
+        rewrite_data_files=RewriteDataFilesConfig(
+            enabled=config["rewrite_data_files"].get("enabled", True),
+            strategy=config["rewrite_data_files"].get("strategy", "binpack"),
+            sort_order=config["rewrite_data_files"].get("sort_order", ""),
+            options=dict(config["rewrite_data_files"].get("options", {}))
+        ) if config.get("rewrite_data_files", None) is not None else RewriteDataFilesConfig(options={}),
 
-    # return ApplicationConfig(
-    #     source_connection=source_connection,
-    #     sync_configs=[parse_sync_config(sync_config) for sync_config in config["syncs"] or []]
-    # )
+        rewrite_manifests=RewriteManifestsConfig(
+            enabled=config["rewrite_manifests"].get("enabled", True),
+            use_caching=config["rewrite_manifests"].get("use_caching", True)
+        ) if config.get("rewrite_manifests", None) is not None else RewriteManifestsConfig()
+    )
+
+    print(app_conf)
+    return app_conf

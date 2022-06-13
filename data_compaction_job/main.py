@@ -6,5 +6,5 @@ from data_compaction_job.sql_compaction import SqlCompaction
 
 def start_job(spark, config):
     init_logger()
-    compaction = SqlCompaction(spark)
+    compaction = SqlCompaction(spark, config)
     compaction.run_compaction()

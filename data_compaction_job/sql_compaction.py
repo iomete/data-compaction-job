@@ -3,71 +3,72 @@ import time
 
 from pyspark.sql import SparkSession
 
+from data_compaction_job.config import ApplicationConfig, ExpireSnapshotConfig, RemoveOrphanFilesConfig, RewriteDataFilesConfig, RewriteManifestsConfig
+
 logger = logging.getLogger(__name__)
 
 class SqlCompaction:
-    def __init__(self, spark: SparkSession):
+    def __init__(self, spark: SparkSession, config: ApplicationConfig):
         self.spark = spark
+        self.config = config
 
     def run_compaction(self):
-        databases = self.spark.catalog.listDatabases()
-        for database in databases:
-            logger.info(f"{database.name}:\t Intorspecting database")
-            tables = self.spark.sql(f"show tables from {database.name}").collect()
+        for database in self.spark.catalog.listDatabases():
+            db_name = database.name
+            logger.info(f"[{db_name}] Intorspecting database")
 
+            tables = self.spark.sql(f"show tables from {db_name}").collect()
+
+            max_table_name_length = max([len(table.tableName) for table in tables]) if len(tables) > 0 else 0
             for table in tables:
+                table_name = table.tableName
                 try:
-                    self.process_table(database.name, table.tableName)
+                    tableMeta = self.spark.sql(f"describe extended {db_name}.{table_name}").collect()
+
+                    # Skip, if not an `iceberg` table
+                    if not any(row.col_name == "Provider" and row.data_type == "iceberg" for row in tableMeta): 
+                        continue
+
+                    message = f"[{db_name}.{table_name: <{max_table_name_length}}] table compaction"
+                    timer(message)(self.__process_table)(db_name, table_name)
+
                 except Exception as e:
-                    logger.error(f"{database.name}.{table.tableName}:\t Error processing table, error={e}")
+                    logger.error(f"[{db_name}.{table_name: <{max_table_name_length}}] Error processing table, error={e}")
 
 
-    def process_table(self, namespace, table_name):
-        tableMeta = self.spark.sql(f"describe extended {namespace}.{table_name}").collect()
+    def __process_table(self, namespace, table_name):
+        self.__expire_snapshots(namespace, table_name, self.config.expire_snapshot)
+        self.__remove_orphan_files(namespace, table_name, self.config.remove_orphan_files)
+        self.__rewrite_data_files(namespace, table_name, self.config.rewrite_data_files)
+        self.__rewrite_manifest(namespace, table_name, self.config.rewrite_manifests)
 
-        # Skip, if not an `iceberg` table
-        if not any(row.col_name == "Provider" and row.data_type == "iceberg" for row in tableMeta):
-            return
+    def __expire_snapshots(self, namespace, table_name, expire_snapshot_config: ExpireSnapshotConfig):
+        if expire_snapshot_config.enabled:
+            self.spark.sql(f"CALL spark_catalog.system.expire_snapshots(table => '{namespace}.{table_name}')")
 
-        logger.info(f"{namespace}.{table_name}:\t with type=iceberg. Starting data compaction...")
+    def __remove_orphan_files(self, namespace, table_name, remove_orphan_files_config: RemoveOrphanFilesConfig):
+        if remove_orphan_files_config.enabled:
+            self.spark.sql(f"CALL spark_catalog.system.remove_orphan_files(table => '{namespace}.{table_name}')")
 
-        self.expire_snapshots(namespace, table_name)
-        self.remove_orphan_files(namespace, table_name)
-        self.rewrite_data_files(namespace, table_name)
-        self.rewrite_manifest(namespace, table_name)
+    def __rewrite_manifest(self, namespace, table_name, rewrite_manifests_config: RewriteManifestsConfig):
+        if rewrite_manifests_config.enabled:
+            self.spark.sql(f"CALL spark_catalog.system.rewrite_manifests(table => '{namespace}.{table_name}')")
 
-    def expire_snapshots(self, namespace, table_name):
-        logger.debug(f"{namespace}.{table_name}:\t expire_snapshots started")
-        start_time = time.time()
+    def __rewrite_data_files(self, namespace, table_name, rewrite_data_files_config: RewriteDataFilesConfig):
+        if rewrite_data_files_config.enabled:
+            self.spark.sql(f"CALL spark_catalog.system.rewrite_data_files(table => '{namespace}.{table_name}')")
 
-        self.spark.sql(f"CALL spark_catalog.system.expire_snapshots(table => '{namespace}.{table_name}')")
 
-        end_time = time.time()
-        logger.info(f"{namespace}.{table_name}:\t expire_snapshots finished! duration={end_time - start_time:0.2f} seconds")
+def timer(message: str):
+    def timer_decorator(method):
+        def timer_func(*args, **kw):
+            logger.debug(f"{message} started")
+            start_time = time.time()
+            result = method(*args, **kw)
+            duration = (time.time() - start_time)
+            logger.info(f"{message} completed in {duration:0.2f} seconds")
+            return result
 
-    def remove_orphan_files(self, namespace, table_name):
-        logger.debug(f"{namespace}.{table_name}:\t remove_orphan_files started")
-        start_time = time.time()
+        return timer_func
 
-        self.spark.sql(f"CALL spark_catalog.system.remove_orphan_files(table => '{namespace}.{table_name}')")
-
-        end_time = time.time()
-        logger.info(f"{namespace}.{table_name}:\t remove_orphan_files finished! duration={end_time - start_time:0.2f} seconds")
-
-    def rewrite_manifest(self, namespace, table_name):
-        logger.debug(f"{namespace}.{table_name}:\t rewrite_manifest started")
-        start_time = time.time()
-
-        self.spark.sql(f"CALL spark_catalog.system.rewrite_manifests(table => '{namespace}.{table_name}')")
-
-        end_time = time.time()
-        logger.info(f"{namespace}.{table_name}:\t rewrite_manifest finished! duration={end_time - start_time:0.2f} seconds")
-
-    def rewrite_data_files(self, namespace, table_name):
-        logger.debug(f"{namespace}.{table_name}:\t rewrite_data_files started")
-        start_time = time.time()
-
-        self.spark.sql(f"CALL spark_catalog.system.rewrite_data_files(table => '{namespace}.{table_name}')")
-
-        end_time = time.time()
-        logger.info(f"{namespace}.{table_name}:\t rewrite_data_files finished! duration={end_time - start_time:0.2f} seconds")
+    return timer_decorator
