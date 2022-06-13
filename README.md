@@ -15,7 +15,8 @@ You can use this job/project to enable data compaction. Follow the next steps in
     - Main application file: `local:///app/driver.py`   
     - Main class: *Leave empty*  
  
-
+Example:
+![Create Spark Job.png](doc/img/173ecfe-data-compaction-job.png)
 
 ## Using project in local/dev environment
 
