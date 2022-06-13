@@ -1,8 +1,8 @@
 docker_image := iomete/iomete_data_compaction
-docker_tag := 0.1.4
+docker_tag := 0.2.0
 
 test:
-	python setup.py test
+	pytest --capture=no --log-cli-level=INFO
 
 docker-push:
 	# Run this for one time: docker buildx create --use
