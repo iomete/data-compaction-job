@@ -19,7 +19,7 @@ def test_spark_session():
     spark.sql(f"insert into sample_table (id, data) values (1, 'test')")
     spark.sql(f"insert into sample_table (id, data) values (2, 'test')")
 
-    # run target
+    # # run target
     start_job(spark, config)
 
 
