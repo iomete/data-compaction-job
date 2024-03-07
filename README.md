@@ -11,7 +11,7 @@ You can use this job/project to enable data compaction. Follow the next steps in
 1. In the left sidebar menu choose `Spark Jobs`    
 2. `Create` new job     
 3. Fill the form with below values:      
-    - Docker Image: `iomete/iomete_data_compaction:0.3.0`    
+    - Docker Image: `iomete/iomete_data_compaction:1.0.0`    
     - Main application file: `local:///app/driver.py`   
     - Main class: *Leave empty*  
  
