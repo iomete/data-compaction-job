@@ -12,36 +12,46 @@ from data_compaction_job.config import ApplicationConfig, ExpireSnapshotConfig, 
 logger = logging.getLogger(__name__)
 
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pyspark.sql import SparkSession
+
 class SqlCompaction:
     def __init__(self, spark: SparkSession, config: ApplicationConfig):
         self.spark = spark
         self.config = config
 
     def run_compaction(self):
-        for catalog in self.__get_catalogs():
-            logger.info(f"[{catalog}] Intorspecting catalog")
-            for database in self.__get_databases(catalog):
-                db_name = database.namespace
-                logger.info(f"[{db_name}] Intorspecting database")
+        with ThreadPoolExecutor(max_workers=self.config.parallelism) as executor:
+            futures = []
+            for catalog in self.__get_catalogs():
+                logger.info(f"[{catalog}] Intorspecting catalog")
+                for database in self.__get_databases(catalog):
+                    db_name = database.namespace
+                    logger.info(f"[{db_name}] Intorspecting database")
+                    tables = self.spark.sql(f"show tables from {catalog}.{db_name}").collect()
+                    for table in tables:
+                        futures.append(executor.submit(self.__process_table_if_iceberg, catalog, db_name, table))
 
-                tables = self.spark.sql(f"show tables from {catalog}.{db_name}").collect()
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"Error processing table, error={e}")
 
-                max_table_name_length = max([len(table.tableName) for table in tables]) if len(tables) > 0 else 0
-                for table in tables:
-                    table_name = table.tableName
-                    try:
-                        tableMeta = self.spark.sql(f"describe extended {db_name}.{table_name}").collect()
+    def __process_table_if_iceberg(self, catalog, db_name, table):
+        table_name = table.tableName
+        try:
+            tableMeta = self.spark.sql(f"describe extended {db_name}.{table_name}").collect()
 
-                        # Skip, if not an `iceberg` table
-                        if not any(row.col_name == "Provider" and row.data_type == "iceberg" for row in tableMeta):
-                            continue
+            # Skip, if not an `iceberg` table
+            if not any(row.col_name == "Provider" and row.data_type == "iceberg" for row in tableMeta):
+                return
 
-                        message = f"[{db_name}.{table_name: <{max_table_name_length}}] table compaction"
-                        timer(message)(self.__process_table)(catalog, db_name, table_name)
+            message = f"[{db_name}.{table_name}] table compaction"
+            timer(message)(self.__process_table)(catalog, db_name, table_name)
 
-                    except Exception as e:
-                        logger.error(
-                            f"[{db_name}.{table_name: <{max_table_name_length}}] Error processing table, error={e}")
+        except Exception as e:
+            logger.error(f"[{db_name}.{table_name}] Error processing table, error={e}")
 
     def __process_table(self, catalog, database, table_name):
         self.__expire_snapshots(catalog, database, table_name, self.config.expire_snapshot)
@@ -98,7 +108,7 @@ def timer(message: str):
 
 class SqlClient:
     def __init__(self):
-        self.base_url = os.getenv("SQL_API_ENDPOINT", "http://iom-sql")
+        self.base_url = os.getenv("SQL_API_ENDPOINT", "http://iom-core")
 
     def catalogs(self):
         response = requests.get(f"{self.base_url}/api/internal/sql/schema/catalogs")

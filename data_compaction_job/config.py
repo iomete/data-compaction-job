@@ -31,6 +31,7 @@ class ApplicationConfig:
     remove_orphan_files: RemoveOrphanFilesConfig = RemoveOrphanFilesConfig()
     rewrite_data_files: RewriteDataFilesConfig = RewriteDataFilesConfig()
     rewrite_manifests: RewriteManifestsConfig = RewriteManifestsConfig()
+    parallelism: int = 4
 
 
 def get_config(application_config_path) -> ApplicationConfig:
@@ -52,5 +53,8 @@ def get_config(application_config_path) -> ApplicationConfig:
         app_config.rewrite_manifests=RewriteManifestsConfig(
             use_caching=config["rewrite_manifests"].get("use_caching", None)
         )
+
+    if "parallelism" in config:
+        app_config.parallelism = config.get("parallelism", 4)
 
     return app_config
