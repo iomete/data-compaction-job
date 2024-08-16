@@ -10,7 +10,7 @@ Over the time iceberg tables could slow down and require to run data compaction 
 
 To enable data compaction spark job follow the next steps:
 
-1. Navigate to the `Job Templates`, then click the `Deploy` button on the **Data Compaction Job** card.
+Navigate to the `Job Templates`, then click the `Deploy` button on the **Data Compaction Job** card.
 
 <!-- 1. In the left sidebar menu choose `Spark Jobs`
 1. `Create` new job
@@ -19,28 +19,31 @@ To enable data compaction spark job follow the next steps:
    - Main application file: `local:///app/driver.py`
    - Main class: _Leave empty_ -->
 
-Example:
-<kbd>
-![IOMETE data compaction job](doc/img/data-compaction-card.png)
-</kbd>
+<kbd>![IOMETE data compaction job](doc/img/data-compaction-card.png)</kbd>
 
-2. You will see the job creation page with all inputs filled.
+<br/>
 
-<kbd>
-![Create data compaction job](doc/img/data-compaction-create-general.png)
-</kbd>
+You will see the job creation page with all inputs filled.
 
-**Job Configurations**
+<kbd><img alt="Create data compaction job" src="doc/img/data-compaction-create-general.png" width="600"></kbd>
 
-<kbd>
-![Data compaction job configurations](doc/img/data-compaction-create-conf.png)
-</kbd>
+<br/>
 
 **Instance**
 
-<kbd>
-![Data compaction job instance](doc/img/data-compaction-create-instance.png)
-</kbd>
+<!-- <kbd>![Data compaction job instance](doc/img/data-compaction-create-instance.png)</kbd> -->
+
+<kbd><img alt="Data compaction job instance" src="doc/img/data-compaction-create-instance.png" width="600"></kbd>
+
+<br/>
+
+**Job Configurations**
+
+<!-- <kbd>![Data compaction job configurations](doc/img/data-compaction-create-conf.png)</kbd> -->
+
+<kbd><img alt="Data compaction job configurations" src="doc/img/data-compaction-create-conf.png" width="600"></kbd>
+
+<br/>
 
 ## Additional Configurations
 
