@@ -23,21 +23,25 @@ Example:
 <kbd>![IOMETE data compaction job](doc/img/data-compaction-card.png)</kbd>
 
 <br/>
+
 2. You will see the job creation page with all inputs filled.
 
 <kbd>![Create data compaction job](doc/img/data-compaction-create-general.png)</kbd>
 
 <br/>
+
 **Job Configurations**
 
 <kbd>![Data compaction job configurations](doc/img/data-compaction-create-conf.png)</kbd>
 
 <br/>
+
 **Instance**
 
 <kbd>![Data compaction job instance](doc/img/data-compaction-create-instance.png)</kbd>
 
 <br/>
+
 ## Additional Configurations
 
 You can specify additional configurations
