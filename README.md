@@ -25,7 +25,7 @@ Navigate to the `Job Templates`, then click the `Deploy` button on the **Data Co
 
 You will see the job creation page with all inputs filled.
 
-<kbd>![Create data compaction job](doc/img/data-compaction-create-general.png)</kbd>
+<kbd>![Create data compaction job](doc/img/data-compaction-create-general.png | width=500)</kbd>
 
 <br/>
 
