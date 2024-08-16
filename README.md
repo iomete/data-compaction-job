@@ -29,19 +29,19 @@ You will see the job creation page with all inputs filled.
 
 <br/>
 
-**Job Configurations**
-
-<!-- <kbd>![Data compaction job configurations](doc/img/data-compaction-create-conf.png)</kbd> -->
-
-<kbd><img alt="Data compaction job configurations" src="doc/img/data-compaction-create-conf.png" width="600"></kbd>
-
-<br/>
-
 **Instance**
 
 <!-- <kbd>![Data compaction job instance](doc/img/data-compaction-create-instance.png)</kbd> -->
 
 <kbd><img alt="Data compaction job instance" src="doc/img/data-compaction-create-instance.png" width="600"></kbd>
+
+<br/>
+
+**Job Configurations**
+
+<!-- <kbd>![Data compaction job configurations](doc/img/data-compaction-create-conf.png)</kbd> -->
+
+<kbd><img alt="Data compaction job configurations" src="doc/img/data-compaction-create-conf.png" width="600"></kbd>
 
 <br/>
 
