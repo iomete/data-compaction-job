@@ -1,25 +1,42 @@
-# iomete: Spark Job Template
+# IOMETE: Spark Job Template
 
-Over the time iceberg tables could slow down and require to run data compaction to clean up tables.     
-**iomete** provides built-in job to run data compactions for each table. This job triggers the next iceberg processes:     
-1. ExpireSnapshots [Maintenance - Expire Snapshots](doc:data-compaction#expire-snapshots)    
-2. Delete Orphan Files - See [Maintenance - Delete Orphan Files](doc:data-compaction#delete-orphan-files)   
-3. Rewrite Data Files - See [Maintenance - Rewrite Data Files](doc:data-compaction#compact-data-files)   
-4. Rewrite Manifests - See [Maintenance](doc:data-compaction#rewrite-manifests)    
-   
-You can use this job/project to enable data compaction. Follow the next steps in iomete Console:     
-1. In the left sidebar menu choose `Spark Jobs`    
-2. `Create` new job     
-3. Fill the form with below values:      
-    - Docker Image: `iomete/iomete_data_compaction:1.0.0`    
-    - Main application file: `local:///app/driver.py`   
-    - Main class: *Leave empty*  
- 
+Over the time iceberg tables could slow down and require to run data compaction to clean up tables.  
+**IOMETE** provides built-in job to run data compactions for each table. This job triggers the next iceberg processes:
+
+1. ExpireSnapshots [Maintenance - Expire Snapshots](https://iomete.com/resources/reference/iceberg-tables/maintenance#expire-snapshots)
+2. Delete Orphan Files - See [Maintenance - Delete Orphan Files](https://iomete.com/resources/reference/iceberg-tables/maintenance#delete-orphan-files)
+3. Rewrite Data Files - See [Maintenance - Rewrite Data Files](https://iomete.com/resources/reference/iceberg-tables/maintenance#compact-data-files)
+4. Rewrite Manifests - See [Maintenance](https://iomete.com/resources/reference/iceberg-tables/maintenance#rewrite-manifests)
+
+To enable data compaction spark job follow the next steps:
+
+1. Navigate to the `Job Templates`, then click the `Deploy` button on the **Data Compaction Job** card.
+
+<!-- 1. In the left sidebar menu choose `Spark Jobs`
+1. `Create` new job
+1. Fill the form with below values:
+   - Docker Image: `iomete/iomete_data_compaction:1.0.0`
+   - Main application file: `local:///app/driver.py`
+   - Main class: _Leave empty_ -->
+
 Example:
-![Create Spark Job.png](doc/img/173ecfe-data-compaction-job.png)
+![IOMETE data compaction job](doc/img/data-compaction-card.png)
+
+2. You will see the job creation page with all inputs filled.
+   ![Create data compaction job](doc/img/data-compaction-create-general.png)
+
+**Job Configurations**
+
+![Data compaction job configurations](doc/img/data-compaction-create-conf.png)
+
+**Instance**
+
+![Data compaction job instance](doc/img/data-compaction-create-instance.png)
 
 ## Additional Configurations
+
 You can specify additional configurations
+
 ```
 {
     expire_snapshot: {
@@ -36,12 +53,12 @@ You can specify additional configurations
             // Defaults to 512MB (536870912 bytes)
             // "target-file-size-bytes": 536870912,
 
-            // The entire rewrite operation is broken down into pieces based on partitioning and within partitions based on size into groups. 
-            // These sub-units of the rewrite are referred to as file groups. 
-            // The largest amount of data that should be compacted in a single group is controlled by MAX_FILE_GROUP_SIZE_BYTES. 
-            // This helps with breaking down the rewriting of very large partitions which may not be rewritable otherwise due to the resource constraints of the cluster. 
+            // The entire rewrite operation is broken down into pieces based on partitioning and within partitions based on size into groups.
+            // These sub-units of the rewrite are referred to as file groups.
+            // The largest amount of data that should be compacted in a single group is controlled by MAX_FILE_GROUP_SIZE_BYTES.
+            // This helps with breaking down the rewriting of very large partitions which may not be rewritable otherwise due to the resource constraints of the cluster.
             // "max-file-group-size-bytes" // default is 1024L * 1024L * 1024L * 100L = 100 GB
-        } 
+        }
     },
     rewrite_manifests: {
         // Set to false to avoid memory issues on executors
