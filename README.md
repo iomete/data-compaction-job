@@ -20,18 +20,27 @@ To enable data compaction spark job follow the next steps:
    - Main class: _Leave empty_ -->
 
 Example:
+<kbd>
 ![IOMETE data compaction job](doc/img/data-compaction-card.png)
+</kbd>
 
 2. You will see the job creation page with all inputs filled.
-   ![Create data compaction job](doc/img/data-compaction-create-general.png)
+
+<kbd>
+![Create data compaction job](doc/img/data-compaction-create-general.png)
+</kbd>
 
 **Job Configurations**
 
+<kbd>
 ![Data compaction job configurations](doc/img/data-compaction-create-conf.png)
+</kbd>
 
 **Instance**
 
+<kbd>
 ![Data compaction job instance](doc/img/data-compaction-create-instance.png)
+</kbd>
 
 ## Additional Configurations
 
