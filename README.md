@@ -6,7 +6,7 @@ Over the time iceberg tables could slow down and require to run data compaction 
 1. ExpireSnapshots [Maintenance - Expire Snapshots](https://iomete.com/resources/reference/iceberg-tables/maintenance#expire-snapshots)
 2. Delete Orphan Files - See [Maintenance - Delete Orphan Files](https://iomete.com/resources/reference/iceberg-tables/maintenance#delete-orphan-files)
 3. Rewrite Data Files - See [Maintenance - Rewrite Data Files](https://iomete.com/resources/reference/iceberg-tables/maintenance#compact-data-files)
-4. Rewrite Manifests - See [Maintenance](https://iomete.com/resources/reference/iceberg-tables/maintenance#rewrite-manifests)
+4. Rewrite Manifests - See [Maintenance- Rewrite Manifest Files](https://iomete.com/resources/reference/iceberg-tables/maintenance#rewrite-manifests)
 
 To enable data compaction spark job follow the next steps:
 
