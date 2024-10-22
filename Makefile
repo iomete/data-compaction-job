@@ -1,5 +1,5 @@
 docker_image := iomete/iomete_data_compaction
-docker_tag := 1.1.1
+docker_tag := 1.2.0
 
 test:
 	pytest --capture=no --log-cli-level=DEBUG
