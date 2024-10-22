@@ -23,7 +23,7 @@ def emit_stats(operation: str):
                 #post-execute error scenario
                 end_time = time.time()
                 spark: SparkSession = args[0].spark
-                spark.sql(f"""INSERT INTO spark_catalog.system_db.table_optimisation_run_errors VALUES (
+                spark.sql(f"""INSERT INTO spark_catalog.iomete_system_db.table_optimisation_run_errors VALUES (
                       '{spark.sparkContext.applicationId}',
                       '{args[1]}',
                       '{args[2]}',
@@ -45,7 +45,7 @@ def emit_stats(operation: str):
 
                 spark: SparkSession = args[0].spark
                 sql = sql.replace("'", "''")
-                spark.sql(f"""INSERT INTO spark_catalog.system_db.table_optimisation_run_metrics VALUES (
+                spark.sql(f"""INSERT INTO spark_catalog.iomete_system_db.table_optimisation_run_metrics VALUES (
       '{spark.sparkContext.applicationId}',
       '{args[1]}',
       '{args[2]}',
@@ -62,8 +62,8 @@ def emit_stats(operation: str):
     return decorator
 
 def init_emitter(spark: SparkSession):
-    spark.sql("create DATABASE IF NOT EXISTS spark_catalog.system_db")
-    spark.sql("""create TABLE IF NOT EXISTS spark_catalog.system_db.table_optimisation_run_metrics (
+    spark.sql("create DATABASE IF NOT EXISTS spark_catalog.iomete_system_db")
+    spark.sql("""create TABLE IF NOT EXISTS spark_catalog.iomete_system_db.table_optimisation_run_metrics (
   spark_app_id VARCHAR(255),
   catalog_name VARCHAR(255),
   database_name VARCHAR(255),
@@ -74,7 +74,7 @@ def init_emitter(spark: SparkSession):
   start_time TIMESTAMP,
   end_time TIMESTAMP
   )""")
-    spark.sql("""create TABLE IF NOT EXISTS spark_catalog.system_db.table_optimisation_run_errors(
+    spark.sql("""create TABLE IF NOT EXISTS spark_catalog.iomete_system_db.table_optimisation_run_errors(
   spark_app_id VARCHAR(255),
   catalog_name VARCHAR(255),
   database_name VARCHAR(255),
