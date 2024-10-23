@@ -230,7 +230,9 @@ def timer(message: str):
 
 class SqlClient:
     def __init__(self):
-        self.base_url = os.getenv("SQL_API_ENDPOINT", "http://iom-core")
+        release_namespace = os.getenv("RELEASE_NAMESPACE", "iomete-system")
+        cluster_domain = os.getenv("CLUSTER_DOMAIN", "cluster.local")
+        self.base_url = os.getenv("SQL_API_ENDPOINT", f"http://iom-core.{release_namespace}.svc.{cluster_domain}")
 
     def catalogs(self):
         response = requests.get(f"{self.base_url}/api/internal/sql/schema/catalogs")
