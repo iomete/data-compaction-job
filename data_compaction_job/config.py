@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 from pyhocon import ConfigFactory
 
@@ -34,11 +34,11 @@ class IncludeExcludeConfig:
 @dataclass
 class ApplicationConfig:
     catalog: str = ""
-    expire_snapshot: ExpireSnapshotConfig = ExpireSnapshotConfig()
-    remove_orphan_files: RemoveOrphanFilesConfig = RemoveOrphanFilesConfig()
-    rewrite_data_files: RewriteDataFilesConfig = RewriteDataFilesConfig()
-    rewrite_manifests: RewriteManifestsConfig = RewriteManifestsConfig()
-    include_exclude: IncludeExcludeConfig = IncludeExcludeConfig()
+    expire_snapshot: ExpireSnapshotConfig = field(default_factory=ExpireSnapshotConfig)
+    remove_orphan_files: RemoveOrphanFilesConfig = field(default_factory=RemoveOrphanFilesConfig)
+    rewrite_data_files: RewriteDataFilesConfig = field(default_factory=RewriteDataFilesConfig)
+    rewrite_manifests: RewriteManifestsConfig = field(default_factory=RewriteManifestsConfig)
+    include_exclude: IncludeExcludeConfig = field(default_factory=IncludeExcludeConfig)
     parallelism: int = 4
     table_overrides: dict[str, dict] = None
 
@@ -48,10 +48,9 @@ def get_config(application_config_path) -> ApplicationConfig:
 
     app_config = ApplicationConfig()
 
-    if "catalog" in config:
-        app_config.catalog = config["catalog"]
-    else:
+    if "catalog" not in config:
         raise Exception("Catalog not provided in config. Please provide catalog for which to run optimisation.")
+    app_config.catalog = config["catalog"]
 
     if "expire_snapshot" in config:
         app_config.expire_snapshot=ExpireSnapshotConfig(
