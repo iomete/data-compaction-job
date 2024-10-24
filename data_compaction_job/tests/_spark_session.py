@@ -1,8 +1,7 @@
 from pyspark.sql import SparkSession
-import tempfile
 
 jar_dependencies = [
-    "org.apache.iceberg:iceberg-spark3-runtime:1.4.2"
+    "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.2"
 ]
 
 packages = ",".join(jar_dependencies)
