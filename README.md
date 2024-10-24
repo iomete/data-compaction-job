@@ -51,11 +51,34 @@ You can specify additional configurations
 
 ```
 {
+    // The catalog for which to run compaction
+    catalog: "spark_catalog",
+    
+    // Databases in the catalog for which to run compaction
+    // Defaults to empty array
+    // In case the input is an empty array then we consider all databases in the provided catalog for compaction 
+    databases: [],
+    
+    // Tables to be included in the compaction run
+    // Used as a whitelist. Default to empty array
+    // In case the input is an empty array then we consider all tables in the provided database for compaction
+    // Expects table in the format <database>.<table>
+    table_include: [],
+    
+    // Tables to be excluded in the compaction run
+    // Used as a blacklist. Defaults to empty array
+    // Ignored if table_include is non empty
+    // Expects table in the format <database>.<table>
+    table_exclude: [],
+    
+    // Default fallback configs for expire_snapshot operation
     expire_snapshot: {
         // Number of ancestor snapshots to preserve regardless of `older_than`
         // DEFAULT: 1
         // retain_last: 1
     },
+    
+    // Default fallback configs for rewrite_data_files operation
     rewrite_data_files: {
         options: {
             // The minimum number of files that need to be in a file group for it to be considered for compaction. Defaults to 5
@@ -72,9 +95,30 @@ You can specify additional configurations
             // "max-file-group-size-bytes" // default is 1024L * 1024L * 1024L * 100L = 100 GB
         }
     },
+    
+    // Default fallback configs for rewrite_manifests operation
     rewrite_manifests: {
         // Set to false to avoid memory issues on executors
         // use_caching: true
+    },
+    
+    // Default fallback configs for remove_orphan_files operation
+    remove_orphan_files: {
+        // Orphan files older than the provided number of days will be removed
+        // Defaults to 1
+        older_than_days: 1
+    },
+    
+    // Used to override operation configs for specific tables
+    table_overrides: {
+        // Table for which configs needs to be overridden
+        "<database>.<table>": {
+            // Operation whose config you want to override
+            "<operations>": {
+                // Operation level config which needs to be overriden
+                "<config_name>" : ""
+            }
+        }
     }
 }
 ```
