@@ -70,6 +70,11 @@ def get_config(application_config_path) -> ApplicationConfig:
             use_caching=config["rewrite_manifests"].get("use_caching", None)
         )
 
+    if "remove_orphan_files" in config:
+        app_config.remove_orphan_files=RemoveOrphanFilesConfig(
+            older_than_days=config["remove_orphan_files"].get("older_than_days", 1)
+        )
+
     if "parallelism" in config:
         app_config.parallelism = config.get("parallelism", 4)
 
