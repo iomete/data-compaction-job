@@ -51,7 +51,7 @@ class SqlCompaction:
 
     def __process_table_if_iceberg(self, catalog, db_name, table):
         try:
-            table_meta = self.spark.sql(f"describe extended {db_name}.{table}").collect()
+            table_meta = self.spark.sql(f"describe extended {catalog}.{db_name}.{table}").collect()
 
             # Skip, if not an `iceberg` table
             if not any(row.col_name == "Provider" and row.data_type == "iceberg" for row in table_meta):
