@@ -1,10 +1,11 @@
+import logging
 import time
 from datetime import datetime, timezone
 from functools import wraps
 
 from pyspark.sql import SparkSession
 
-
+logger = logging.getLogger(__name__)
 def emit_stats(operation: str):
     """Emits metric for the table optimisation operation that is being performed."""
 
@@ -33,7 +34,7 @@ def emit_stats(operation: str):
                       TIMESTAMP '{datetime.fromtimestamp(start_time ,timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}',
                       TIMESTAMP '{datetime.fromtimestamp(end_time, timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}'
                     )""")
-                raise e
+                logger.error(f"[{args[2]}.{args[3]}] Error running {operation} on table, error={e}")
             else:
                 #post-execute happy scenario
                 end_time = time.time()
