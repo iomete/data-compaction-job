@@ -64,10 +64,10 @@ class SqlCompaction:
             logger.error(f"[{db_name}.{table}] Error processing table, error={e}")
 
     def __process_table(self, catalog, database, table_name):
+        self.__rewrite_manifest(catalog, database, table_name)
+        self.__rewrite_data_files(catalog, database, table_name)
         self.__expire_snapshots(catalog, database, table_name)
         self.__remove_orphan_files(catalog, database, table_name)
-        self.__rewrite_data_files(catalog, database, table_name)
-        self.__rewrite_manifest(catalog, database, table_name)
 
     @emit_stats("EXPIRE_SNAPSHOTS")
     def __expire_snapshots(self, catalog, database, table_name):
