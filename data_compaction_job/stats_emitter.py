@@ -74,6 +74,9 @@ def init_emitter(spark: SparkSession):
   metrics MAP<STRING, STRING>,
   start_time TIMESTAMP,
   end_time TIMESTAMP
+  )
+  TBLPROPERTIES (
+  'commit.retry.num-retries' = '200'
   )""")
     spark.sql("""create TABLE IF NOT EXISTS spark_catalog.iomete_system_db.table_optimisation_run_errors(
   spark_app_id VARCHAR(255),
@@ -84,4 +87,9 @@ def init_emitter(spark: SparkSession):
   error STRING,
   start_time TIMESTAMP,
   end_time TIMESTAMP
+  )
+  TBLPROPERTIES (
+  'commit.retry.num-retries' = '200'
   )""")
+    spark.sql(" ALTER TABLE spark_catalog.iomete_system_db.table_optimisation_run_metrics SET TBLPROPERTIES ('commit.retry.num-retries' = '200') ")
+    spark.sql(" ALTER TABLE spark_catalog.iomete_system_db.table_optimisation_run_errors SET TBLPROPERTIES ('commit.retry.num-retries' = '200') ")
