@@ -46,7 +46,6 @@ def test_spark_session():
         'write.delete.mode' = 'merge-on-read'
     )""")
 
-
     # Insert data
     spark.sql("""
     INSERT INTO default.copy_on_write_table (id, name, age, zipcode, timestamp)
@@ -233,5 +232,72 @@ VALUES
     assert compaction_cow_df.subtract(update_cow_df).count() == 0
     assert update_cow_df.subtract(compaction_cow_df).count() == 0
 
+    # Clean up test tables
+    spark.sql("DROP TABLE IF EXISTS default.copy_on_write_table")
+    spark.sql("DROP TABLE IF EXISTS default.merge_on_read_table")
+
+
+def test_gc_handling_feature():
+    """Test the G.C. handling feature when G.C. is disabled for a table."""
+    config = get_config("application.conf")
+    config.gc_handling.enabled = True
+
+    # create test spark instance
+    spark = get_spark_session()
+
+    # Create test database and table with G.C. disabled
+    spark.sql("CREATE DATABASE IF NOT EXISTS test_gc")
+    spark.sql("""
+    CREATE TABLE IF NOT EXISTS test_gc.disabled_gc_table (
+        id BIGINT,
+        name STRING
+    )
+    USING iceberg
+    TBLPROPERTIES (
+        'gc.enabled' = 'false'
+    )""")
+    
+    # Insert some data
+    spark.sql("""
+    INSERT INTO test_gc.disabled_gc_table VALUES
+        (1, 'test1'),
+        (2, 'test2'),
+        (3, 'test3')
+    """)
+    
+    # Verify initial state - G.C. should be disabled
+    gc_props_before = spark.sql("SHOW TBLPROPERTIES test_gc.disabled_gc_table").collect()
+    gc_enabled_before = None
+    for row in gc_props_before:
+        if row.key.lower() == "gc.enabled":
+            gc_enabled_before = row.value.lower()
+    
+    assert gc_enabled_before == "false"
+    
+    # Capture initial data for comparison
+    data_before = spark.sql("SELECT * FROM test_gc.disabled_gc_table").collect()
+    
+    # Run compaction job
+    start_job(spark, config)
+    
+    # Verify data is intact after compaction
+    data_after = spark.sql("SELECT * FROM test_gc.disabled_gc_table").collect()
+    assert len(data_before) == len(data_after)
+    
+    # Verify G.C. was restored to disabled state
+    gc_props_after = spark.sql("SHOW TBLPROPERTIES test_gc.disabled_gc_table").collect()
+    gc_enabled_after = None
+    for row in gc_props_after:
+        if row.key.lower() == "gc.enabled":
+            gc_enabled_after = row.value.lower()
+    
+    assert gc_enabled_after == "false"
+    
+    # Clean up test table
+    spark.sql("DROP TABLE IF EXISTS test_gc.disabled_gc_table")
+    spark.sql("DROP DATABASE IF EXISTS test_gc")
+
+
 if __name__ == '__main__':
     test_spark_session()
+    test_gc_handling_feature()
