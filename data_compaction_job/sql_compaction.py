@@ -64,10 +64,60 @@ class SqlCompaction:
             logger.error(f"[{db_name}.{table}] Error processing table, error={e}")
 
     def __process_table(self, catalog, database, table_name):
+        if self.config.gc_handling.enabled:
+            gc_enabled = self.__check_gc_enabled(catalog, database, table_name)
+            
+            if gc_enabled is False:  # GC is disabled for this table
+                logger.info(f"[{database}.{table_name}] G.C. is disabled. Temporarily enabling it for compaction.")
+                self.__set_gc_enabled(catalog, database, table_name, True)
+                
+                try:
+                    # Run all the compaction operations
+                    self.__run_compaction_operations(catalog, database, table_name)
+                finally:
+                    # Disable GC again after compaction operations
+                    logger.info(f"[{database}.{table_name}] Disabling G.C. after compaction.")
+                    self.__set_gc_enabled(catalog, database, table_name, False)
+            else:
+                # GC is already enabled or None (not set), proceed with normal flow
+                self.__run_compaction_operations(catalog, database, table_name)
+        else:
+            # GC handling is not enabled, proceed with normal flow
+            self.__run_compaction_operations(catalog, database, table_name)
+
+    def __run_compaction_operations(self, catalog, database, table_name):
+        """Run all compaction operations for a table"""
         self.__rewrite_manifest(catalog, database, table_name)
         self.__rewrite_data_files(catalog, database, table_name)
         self.__expire_snapshots(catalog, database, table_name)
         self.__remove_orphan_files(catalog, database, table_name)
+
+    def __check_gc_enabled(self, catalog, database, table_name):
+        try:
+            # Get the table properties
+            result = self.spark.sql(f"SHOW TBLPROPERTIES {catalog}.{database}.{table_name}").collect()
+            
+            # Look for the G.C. enabled property (might be named differently depending on implementation)
+            for row in result:
+                if row.key.lower() == "gc.enabled":
+                    return row.value.lower() == "true"
+            
+            # Property not found
+            return True
+        except Exception as e:
+            logger.warning(f"[{database}.{table_name}] Failed to check G.C. status: {e}")
+            return True
+
+    def __set_gc_enabled(self, catalog, database, table_name, enabled):
+        try:
+            # Convert boolean to string value
+            value = str(enabled).lower()
+            # Set the property
+            self.spark.sql(f"ALTER TABLE {catalog}.{database}.{table_name} SET TBLPROPERTIES ('gc.enabled' = '{value}')").collect()
+            logger.info(f"[{database}.{table_name}] Set G.C. enabled to {value}")
+        except Exception as e:
+            logger.error(f"[{database}.{table_name}] Failed to set G.C. enabled to {enabled}: {e}")
+            raise e
 
     @emit_stats("EXPIRE_SNAPSHOTS")
     def __expire_snapshots(self, catalog, database, table_name):

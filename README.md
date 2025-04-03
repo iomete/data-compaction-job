@@ -71,6 +71,14 @@ You can specify additional configurations
     // Expects table in the format <database>.<table>
     table_exclude: [],
     
+    // Configuration for handling tables with G.C. disabled
+    // When enabled, the job will check if G.C. is disabled for a table
+    // If G.C. is disabled, it will temporarily enable it, run compaction, and then disable it again
+    // Defaults to false
+    gc_handling: {
+        enabled: false
+    },
+    
     // Default fallback configs for expire_snapshot operation
     expire_snapshot: {
         // Number of ancestor snapshots to preserve regardless of `older_than`

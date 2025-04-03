@@ -25,6 +25,12 @@ class RewriteDataFilesConfig:
 class RewriteManifestsConfig:
     use_caching: bool = None
 
+
+@dataclass
+class GCHandlingConfig:
+    enabled: bool = False
+
+
 @dataclass
 class IncludeExcludeConfig:
     databases: list[str] = None
@@ -38,6 +44,7 @@ class ApplicationConfig:
     remove_orphan_files: RemoveOrphanFilesConfig = field(default_factory=RemoveOrphanFilesConfig)
     rewrite_data_files: RewriteDataFilesConfig = field(default_factory=RewriteDataFilesConfig)
     rewrite_manifests: RewriteManifestsConfig = field(default_factory=RewriteManifestsConfig)
+    gc_handling: GCHandlingConfig = field(default_factory=GCHandlingConfig)
     include_exclude: IncludeExcludeConfig = field(default_factory=IncludeExcludeConfig)
     parallelism: int = 4
     table_overrides: dict[str, dict] = None
@@ -73,6 +80,11 @@ def get_config(application_config_path) -> ApplicationConfig:
     if "remove_orphan_files" in config:
         app_config.remove_orphan_files=RemoveOrphanFilesConfig(
             older_than_days=config["remove_orphan_files"].get("older_than_days", 1)
+        )
+
+    if "gc_handling" in config:
+        app_config.gc_handling=GCHandlingConfig(
+            enabled=config["gc_handling"].get("enabled", False)
         )
 
     if "parallelism" in config:
