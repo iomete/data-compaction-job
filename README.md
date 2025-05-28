@@ -54,6 +54,11 @@ You can specify additional configurations
     // The catalog for which to run compaction
     catalog: "spark_catalog",
     
+    // Batch size for stats collection (default: 100)
+    // Higher values reduce database writes but use more memory
+    // Set to 1 to disable batching (immediate writes)
+    stats_batch_size: 100,
+    
     // Databases in the catalog for which to run compaction
     // Defaults to empty array
     // In case the input is an empty array then we consider all databases in the provided catalog for compaction 

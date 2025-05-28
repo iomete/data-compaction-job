@@ -8,7 +8,7 @@ from functools import cache
 import requests
 
 from data_compaction_job.config import ApplicationConfig, RewriteManifestsConfig
-from stats_emitter import emit_stats, init_emitter
+from stats_emitter import emit_stats, init_emitter, close_emitter
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class SqlCompaction:
                 if tables:
                     db_table_mapping[database] = tables
 
-            init_emitter(self.spark)
+            init_emitter(self.spark, batch_size=self.config.stats_batch_size)
             for database in databases:
                 for table in db_table_mapping[database]:
                     futures.append(executor.submit(self.__process_table_if_iceberg, catalog, database, table))
@@ -48,6 +48,8 @@ class SqlCompaction:
                     future.result()
                 except Exception as e:
                     logger.error(f"Error processing table, error={e}")
+
+            close_emitter(self.spark)
 
     def __process_table_if_iceberg(self, catalog, db_name, table):
         try:

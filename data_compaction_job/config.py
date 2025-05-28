@@ -47,6 +47,7 @@ class ApplicationConfig:
     gc_handling: GCHandlingConfig = field(default_factory=GCHandlingConfig)
     include_exclude: IncludeExcludeConfig = field(default_factory=IncludeExcludeConfig)
     parallelism: int = 4
+    stats_batch_size: int = 100
     table_overrides: dict[str, dict] = None
 
 
@@ -89,6 +90,9 @@ def get_config(application_config_path) -> ApplicationConfig:
 
     if "parallelism" in config:
         app_config.parallelism = config.get("parallelism", 4)
+
+    if "stats_batch_size" in config:
+        app_config.stats_batch_size = config.get("stats_batch_size", 100)
 
     if "databases" in config:
         app_config.include_exclude.databases = config.get("databases", [])
