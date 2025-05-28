@@ -129,7 +129,7 @@ class SqlCompaction:
                                                            "expire_snapshot",
                                                            "retain_last")
                          or self.config.expire_snapshot.retain_last)
-        options = (f"table => '{database}.{table_name}',"
+        options = (f"table => '`{catalog}`.`{database}`.`{table_name}`',"
                    f" retain_last => {retain_last},"
                    f" older_than => TIMESTAMP '{timestamp}'")
         query = f"CALL {catalog}.system.expire_snapshots({options})"
@@ -144,14 +144,14 @@ class SqlCompaction:
                                                      "older_than_days")
                    or self.config.remove_orphan_files.older_than_days)
         timestamp = datetime.now(timezone.utc) - timedelta(days=days)
-        options = f"table => '{database}.{table_name}', older_than => TIMESTAMP '{timestamp}'"
+        options = f"table => '`{catalog}`.`{database}`.`{table_name}`', older_than => TIMESTAMP '{timestamp}'"
         query = f"CALL {catalog}.system.remove_orphan_files({options})"
         result = self.spark.sql(query).collect()
         return result, query
 
     @emit_stats("REWRITE_MANIFESTS")
     def __rewrite_manifest(self, catalog, database, table_name):
-        options = f"table => '{database}.{table_name}'"
+        options = f"table => '`{catalog}`.`{database}`.`{table_name}`'"
         use_caching = (self.__get_final_config_for_table(database,
                                                      table_name,
                                                      "rewrite_manifest",
@@ -187,7 +187,7 @@ class SqlCompaction:
                                                      "where")
                     or self.config.rewrite_data_files.where)
 
-        options = f"table => '{database}.{table_name}'"
+        options = f"table => '`{catalog}`.`{database}`.`{table_name}`'"
 
         if strategy and strategy == "sort":
             options += f", strategy => {strategy}, sort_order => {sort_order}"
